@@ -16,7 +16,7 @@ func TestDeployGreeter(t *testing.T) {
 	auth := bind.NewKeyedTransactor(key)
 	alloc := make(core.GenesisAlloc)
 	alloc[auth.From] = core.GenesisAccount{Balance: big.NewInt(1000000000)}
-	blockchain := backends.NewSimulatedBackend(alloc)
+	blockchain := backends.NewSimulatedBackend(alloc, 10000000)
 
 	// Deploy contract
 	address, _, _, err := DeployGreeter(
