@@ -60,3 +60,35 @@ func TestGetMessage(t *testing.T) {
 		t.Errorf("Expected message to be: Hello World. Go: %s", got)
 	}
 }
+
+// Test message gets updated correctly
+func TestSetMessage(t *testing.T) {
+	// Setup simulated blockchain
+	key, _ := crypto.GenerateKey()
+	auth := bind.NewKeyedTransactor(key)
+	alloc := make(core.GenesisAlloc)
+	alloc[auth.From] = core.GenesisAccount{Balance: big.NewInt(1000000000)}
+	blockchain := backends.NewSimulatedBackend(alloc, 10000000)
+
+	// Deploy contract
+
+	_, _, contract, _ := DeployGreeter(
+		auth,
+		blockchain,
+		"Hello World",
+	)
+
+	// Commit all pending transactions
+	blockchain.Commit()
+	contract.SetMessage(&bind.TransactOpts{
+		From:auth.From,
+		Signer:auth.Signer,
+		Value: nil,
+	}, "Hello from Mars")
+
+	blockchain.Commit()
+
+	if got, _ := contract.Message(nil); got != "Hello from Mars" {
+		t.Errorf("Expected message to be: Hello World. Go: %s", got)
+	}
+}
