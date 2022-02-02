@@ -36,3 +36,27 @@ func TestDeployGreeter(t *testing.T) {
 		t.Error("Expected a valid deployment address. Received empty address byte array instead")
 	}
 }
+
+// Test initial message gets set up correctly
+func TestGetMessage(t *testing.T) {
+	// Setup simulated block chain
+	key, _ := crypto.GenerateKey()
+	auth := bind.NewKeyedTransactor(key)
+	alloc := make(core.GenesisAlloc)
+	alloc[auth.From] = core.GenesisAccount{Balance: big.NewInt(1000000000)}
+	blockchain := backends.NewSimulatedBackend(alloc, 10000000)
+
+	// Deploy contract
+	_, _, contract, _ := DeployGreeter(
+		auth,
+		blockchain,
+		"Hello World",
+	)
+
+	// Commit all pending transactions
+	blockchain.Commit()
+
+	if got, _ := contract.Greet(nil); got != "Hello World" {
+		t.Errorf("Expected message to be: Hello World. Go: %s", got)
+	}
+}
